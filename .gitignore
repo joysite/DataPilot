@@ -45,3 +45,6 @@ data/processed/*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Evaluation ground truth (local-only, must not be exposed to Agent)
+evaluation/ground_truth/
