@@ -1,0 +1,7 @@
+"""SQLAlchemy ORM 基础配置。"""
+
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """所有 ORM 模型的统一基类。"""
