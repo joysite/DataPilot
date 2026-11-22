@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     )
 
     database_url: str = f"sqlite+aiosqlite:///{PROJECT_ROOT / 'data' / 'datapilot.db'}"
+    checkpointer_path: Path = PROJECT_ROOT / "data" / "checkpointer.db"
+
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5-coder:7b"
     ollama_temperature: float = 0.0

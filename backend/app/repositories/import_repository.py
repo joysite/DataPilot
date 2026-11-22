@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.import_error import ImportError
@@ -101,3 +101,58 @@ class ImportRepository:
         await session.flush()
 
         return len(error_records)
+
+    @staticmethod
+    async def list_records(
+        session: AsyncSession,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> list[ImportRecord]:
+        """分页查询导入记录，最新记录优先。"""
+        if not 1 <= limit <= 100:
+            raise ValueError("limit 必须在 1 到 100 之间")
+        if offset < 0:
+            raise ValueError("offset 不能小于 0")
+
+        statement = (
+            select(ImportRecord)
+            .order_by(
+                ImportRecord.created_at.desc(),
+                ImportRecord.id.desc(),
+            )
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await session.scalars(statement)
+        return list(result.all())
+
+    @staticmethod
+    async def count_records(session: AsyncSession) -> int:
+        """统计导入记录总数。"""
+        statement = select(func.count()).select_from(ImportRecord)
+        return await session.scalar(statement) or 0
+
+    @staticmethod
+    async def get_record_by_id(
+        session: AsyncSession,
+        import_record_id: int,
+    ) -> ImportRecord | None:
+        """根据 ID 查询导入记录。"""
+        return await session.get(ImportRecord, import_record_id)
+
+    @staticmethod
+    async def get_errors_by_record_id(
+        session: AsyncSession,
+        import_record_id: int,
+    ) -> list[ImportError]:
+        """查询指定导入记录的错误明细。"""
+        statement = (
+            select(ImportError)
+            .where(ImportError.import_record_id == import_record_id)
+            .order_by(
+                ImportError.row_number.asc(),
+                ImportError.id.asc(),
+            )
+        )
+        result = await session.scalars(statement)
+        return list(result.all())

@@ -1,5 +1,6 @@
 """ORM 模型统一注册入口。"""
 
+from app.models.agent_memory import AgentMemory
 from app.models.import_error import ImportError
 from app.models.import_record import ImportRecord
 from app.models.order import Order
@@ -12,4 +13,5 @@ __all__ = [
     "Order",
     "ImportRecord",
     "ImportError",
+    "AgentMemory",
 ]

@@ -6,7 +6,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Order
+from app.models import Order, Product
 
 VALID_ORDER_STATUSES = ("paid", "shipped", "completed")
 
@@ -96,3 +96,94 @@ class AnalyticsRepository:
             "total_order_count": total_order_count,
             "cancellation_rate": cancellation_rate,
         }
+
+    @staticmethod
+    async def get_monthly_gmv(
+        session: AsyncSession,
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> list[dict]:
+        """统计指定日期范围内每月有效订单 GMV。"""
+
+        conditions = [
+            Order.order_status.in_(VALID_ORDER_STATUSES),
+        ]
+
+        if start_date is not None:
+            start_datetime = datetime.combine(start_date, time.min)
+            conditions.append(Order.order_time >= start_datetime)
+
+        if end_date is not None:
+            end_datetime = datetime.combine(
+                end_date + timedelta(days=1),
+                time.min,
+            )
+            conditions.append(Order.order_time < end_datetime)
+
+        month_expression = func.strftime("%Y-%m", Order.order_time)
+
+        statement = (
+            select(
+                month_expression.label("month"),
+                func.sum(Order.order_amount).label("gmv"),
+            )
+            .where(*conditions)
+            .group_by(month_expression)
+            .order_by(month_expression)
+        )
+
+        result = await session.execute(statement)
+
+        return [
+            {
+                "month": row.month,
+                "gmv": row.gmv,
+            }
+            for row in result
+        ]
+
+    @staticmethod
+    async def compare_categories(
+        session: AsyncSession,
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> list[dict]:
+        """统计各商品品类的有效订单 GMV 和订单量。"""
+
+        conditions = [
+            Order.order_status.in_(VALID_ORDER_STATUSES),
+        ]
+
+        if start_date is not None:
+            start_datetime = datetime.combine(start_date, time.min)
+            conditions.append(Order.order_time >= start_datetime)
+
+        if end_date is not None:
+            end_datetime = datetime.combine(
+                end_date + timedelta(days=1),
+                time.min,
+            )
+            conditions.append(Order.order_time < end_datetime)
+
+        statement = (
+            select(
+                Product.category.label("category"),
+                func.sum(Order.order_amount).label("gmv"),
+                func.count(Order.order_id).label("valid_order_count"),
+            )
+            .join(Product, Order.product_id == Product.product_id)
+            .where(*conditions)
+            .group_by(Product.category)
+            .order_by(func.sum(Order.order_amount).desc())
+        )
+
+        result = await session.execute(statement)
+
+        return [
+            {
+                "category": row.category,
+                "gmv": row.gmv,
+                "valid_order_count": row.valid_order_count,
+            }
+            for row in result
+        ]

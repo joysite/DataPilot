@@ -1,0 +1,30 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="brand" x1="8" y1="8" x2="56" y2="56">
+      <stop offset="0%" stop-color="#60A5FA"></stop>
+      <stop offset="100%" stop-color="#2563EB"></stop>
+    </linearGradient>
+  </defs>
+
+  <g stroke="url(#brand)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M30 12C26 7 18 9 17 16C10 17 8 25 12 30C7 36 11 45 18 46C18 53 26 56 31 51V13"></path>
+    <path d="M34 12C38 7 46 9 47 16C54 17 56 25 52 30C57 36 53 45 46 46C46 53 38 56 33 51V13"></path>
+
+    <path d="M17 24H25L30 29"></path>
+    <path d="M47 24H39L34 29"></path>
+    <path d="M18 40H25L30 35"></path>
+    <path d="M46 40H39L34 35"></path>
+    <path d="M32 13V51"></path>
+
+    <circle cx="17" cy="24" r="2" fill="#60A5FA"></circle>
+    <circle cx="47" cy="24" r="2" fill="#60A5FA"></circle>
+    <circle cx="18" cy="40" r="2" fill="#60A5FA"></circle>
+    <circle cx="46" cy="40" r="2" fill="#60A5FA"></circle>
+
+    <path d="M25 29L30 29L30 35"></path>
+    <path d="M39 29L34 29L34 35"></path>
+  </g>
+
+  <path d="M26 47L30 43L34 46L39 38" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
